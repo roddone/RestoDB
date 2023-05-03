@@ -34,11 +34,12 @@ foreach (var table in tables)
 
         if (take.HasValue) sqlQuery = sqlQuery.Take(take.Value);
 
-        if (skip.HasValue) sqlQuery.Skip(skip.Value);
+        if (skip.HasValue) sqlQuery = sqlQuery.Skip(skip.Value);
 
         return sqlQuery.GetAsync();
     });
 }
+
 
 if (swaggerEnabled)
 {
