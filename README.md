@@ -10,3 +10,4 @@ Rest over database
 - Crud operations ?
 - Dockerize
 - Write a decent readme
+- Add a cache
