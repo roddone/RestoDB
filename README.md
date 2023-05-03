@@ -11,3 +11,4 @@ Rest over database
 - Dockerize
 - Write a decent readme
 - Add a cache
+- Add more database providers
