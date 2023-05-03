@@ -26,11 +26,17 @@ if (limitTo?.Any() == true) tables = tables.Where(t => limitTo.Contains(t));
 
 foreach (var table in tables)
 {
-    app.MapGet($"/{table}", ([FromServices] SqlKataQueryFactory factory) =>
+    app.MapGet($"/api/{table}", ([FromServices] SqlKataQueryFactory factory, string? select, int? skip, int? take) =>
     {
-        Query query = factory.Create(table);
+        Query sqlQuery = factory.Create(table);
 
-        return query.GetAsync();
+        if (!string.IsNullOrWhiteSpace(select)) sqlQuery = sqlQuery.Select(select.Split(','));
+
+        if (take.HasValue) sqlQuery = sqlQuery.Take(take.Value);
+
+        if (skip.HasValue) sqlQuery.Skip(skip.Value);
+
+        return sqlQuery.GetAsync();
     });
 }
 
