@@ -42,6 +42,8 @@ public abstract class SqlKataQueryFactory
     protected abstract IDbConnection GetConnection(string connectionString);
 
     protected abstract Compiler GetCompiler();
+
+    public abstract Task<IEnumerable<string>> GetTablesListAsync();
 }
 
 public class NpgSqlQueryFactory : SqlKataQueryFactory
@@ -54,6 +56,14 @@ public class NpgSqlQueryFactory : SqlKataQueryFactory
 
     protected override IDbConnection GetConnection(string connectionString)
         => new NpgsqlConnection(connectionString);
+
+    public override async Task<IEnumerable<string>> GetTablesListAsync()
+    {
+        return await Create("pg_catalog.pg_tables")
+                            .WhereNotIn("schemaname", new string[] { "pg_catalog", "information_schema" })
+                            .Select("tablename")
+                            .GetAsync<string>();
+    }
 }
 
 public class SqlServerQueryFactory : SqlKataQueryFactory
@@ -66,4 +76,12 @@ public class SqlServerQueryFactory : SqlKataQueryFactory
 
     protected override IDbConnection GetConnection(string connectionString)
         => new SqlConnection(connectionString);
+
+    public override async Task<IEnumerable<string>> GetTablesListAsync()
+    {
+        return await Create("INFORMATION_SCHEMA.TABLES")
+                                .WhereNot("TABLE_SCHEMA", "sys")
+                                .Select("TABLE_NAME")
+                                .GetAsync<string>();
+    }
 }
