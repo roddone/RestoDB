@@ -1,4 +1,7 @@
+using Access.It.Web.Swagger.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
+using RestODb.Core;
 using SqlKata;
 using SqlKata.Execution;
 using System.Runtime.CompilerServices;
@@ -9,15 +12,18 @@ builder.Configuration.AddJsonFile("appSettings.json");
 if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appSettings.Development.json");
 
 //add correct SQLKata provider 
-DbProviders provider = builder.Configuration.GetValue<DbProviders>("provider");
+DbProviders provider = builder.Configuration.GetValue<DbProviders>("DbProvider");
 if (provider == DbProviders.NpgSql) builder.Services.AddSingleton<SqlKataQueryFactory, NpgSqlQueryFactory>();
 else if (provider == DbProviders.SqlServer) builder.Services.AddSingleton<SqlKataQueryFactory, SqlServerQueryFactory>();
 
-// enable swagger
-bool swaggerEnabled = builder.Configuration.GetValue<bool>("enableSwagger");
-if (swaggerEnabled) builder.Services.AddEndpointsApiExplorer().AddOpenApiDocument(c => { c.Title = "RestODb"; c.Version = "v1"; });
+builder.Services.AddCustomSwagger(builder.Configuration);
 
 builder.Services.AddLogging();
+
+// handle authentication
+bool authEnabled = builder.Configuration.GetValue<bool>("Auth:Enabled");
+if (authEnabled) builder.Services.AddJwtBearerAuthentication(builder.Configuration);
+
 var app = builder.Build();
 
 //get available routes
@@ -29,7 +35,7 @@ if (limitTo?.Any() == true) tables = tables.Where(t => limitTo.Contains(t));
 //create routes (create individual routes so they can appear in swagger
 foreach (var table in tables)
 {
-    app.MapGet($"/api/{table}", ([FromServices] SqlKataQueryFactory factory, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc) =>
+    var route = app.MapGet($"/api/{table}", ([FromServices] SqlKataQueryFactory factory, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc) =>
     {
         Query sqlQuery = factory.Create(table);
 
@@ -46,15 +52,19 @@ foreach (var table in tables)
         }
 
         return sqlQuery.GetAsync();
-    });
+    }).WithName(table).WithOpenApi();
+
+    if (authEnabled) route.RequireAuthorization();
 }
 
-
-if (swaggerEnabled)
+if (authEnabled)
 {
-    app.UseOpenApi();
-    app.UseSwaggerUi3();
+    app
+        .UseAuthentication()
+        .UseAuthorization();
 }
+
+app.UseCustomSwaggerUi(builder.Configuration);
 
 await app.RunAsync();
 
