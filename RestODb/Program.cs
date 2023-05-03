@@ -13,7 +13,7 @@ DbProviders provider = builder.Configuration.GetValue<DbProviders>("provider");
 if (provider == DbProviders.NpgSql) builder.Services.AddSingleton<SqlKataQueryFactory, NpgSqlQueryFactory>();
 else if (provider == DbProviders.SqlServer) builder.Services.AddSingleton<SqlKataQueryFactory, SqlServerQueryFactory>();
 
-if (swaggerEnabled) builder.Services.AddEndpointsApiExplorer().AddOpenApiDocument(c => { c.Title = "toto"; c.Version = "v1"; });
+if (swaggerEnabled) builder.Services.AddEndpointsApiExplorer().AddOpenApiDocument(c => { c.Title = "RestODb"; c.Version = "v1"; });
 
 builder.Services.AddLogging();
 var app = builder.Build();
