@@ -34,17 +34,19 @@ var tables = await sqlKata.GetTablesListAsync();
 var limitTo = builder.Configuration.GetSection("limitTo").Get<string[]>();
 if (limitTo?.Any() == true) tables = tables.Where(t => limitTo.Contains(t));
 
+string apiSegment = builder.Configuration.GetValue("ApiSegment", "api")!;
+
 app.Use(async (ctx, next) =>
 {
     //only /api/* routes
-    if (!ctx.Request.Path.Value?.StartsWith("/api") == true)
+    if (!ctx.Request.Path.Value?.StartsWith($"/{apiSegment}") == true)
     {
         await next(ctx);
         return;
     }
 
     var logger = ctx.RequestServices.GetService<ILogger<Program>>()!;
-    logger.LogDebug("Start selecting rows in table '{table}', with params : select={select}; skip={skip}; take={take}; orderBy={orderBy}; orderByDesc={orderByDesc};", ctx.Request.Path.Value.Replace("/api/", string.Empty), ctx.Request.Query["select"], ctx.Request.Query["skip"], ctx.Request.Query["take"], ctx.Request.Query["orderBy"], ctx.Request.Query["orderByDesc"]);
+    logger.LogDebug("Start selecting rows in table '{table}', with params : select={select}; skip={skip}; take={take}; orderBy={orderBy}; orderByDesc={orderByDesc};", ctx.Request.Path.Value.Replace($"/{apiSegment}/", string.Empty), ctx.Request.Query["select"], ctx.Request.Query["skip"], ctx.Request.Query["take"], ctx.Request.Query["orderBy"], ctx.Request.Query["orderByDesc"]);
 
     Stopwatch sw = Stopwatch.StartNew();
     try
@@ -62,7 +64,7 @@ app.Use(async (ctx, next) =>
 //create routes (create individual routes so they can appear in swagger
 foreach (var table in tables)
 {
-    var route = app.MapGet($"/api/{table}", ([FromServices] SqlKataQueryFactory factory, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc) =>
+    var route = app.MapGet($"/{apiSegment}/{table}", ([FromServices] SqlKataQueryFactory factory, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc) =>
     {
         Query sqlQuery = factory.Create(table);
 
