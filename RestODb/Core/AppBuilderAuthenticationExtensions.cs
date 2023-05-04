@@ -6,41 +6,59 @@ namespace RestODb.Core
     public static class AppBuilderAuthenticationExtensions
     {
         public static IServiceCollection AddRestoDbJwtBearerAuthentication(this IServiceCollection services, IConfiguration configuration)
-        => services
-            .AddAuthorization()
-            .AddAuthentication("MyBearer")
-            .AddJwtBearer("MyBearer", x =>
+        {
+            bool authEnabled = configuration.GetValue<bool>("Auth:Enabled");
+
+            if (authEnabled)
+                services
+                .AddAuthorization()
+                .AddAuthentication("MyBearer")
+                .AddJwtBearer("MyBearer", x =>
+                {
+                    AuthProviderOptions? authSection =
+                        configuration.GetSection("Authentication").Get<AuthProviderOptions>() ?? throw new Exception("Auth section must exists");
+
+                    x.RequireHttpsMetadata = authSection.RequireHttpsMetadata;
+                    x.SaveToken = authSection.SaveToken;
+                    x.Authority = authSection.Issuer;
+                    x.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateLifetime = authSection.ValidateLifetime,
+
+                        //issuer
+                        ValidIssuer = authSection.Issuer,
+                        ValidateIssuer = authSection.ValidateIssuer,
+
+                        //audience
+                        ValidAudience = authSection.Audience,
+                        ValidateAudience = authSection.ValidateAudience,
+
+                        NameClaimType = authSection.NameClaimType,
+                        RoleClaimType = authSection.RoleClaimType,
+                    };
+
+                    if (authSection.ValidateIssuerSigningKey)
+                    {
+                        x.TokenValidationParameters.ValidateIssuerSigningKey = authSection.ValidateIssuerSigningKey;
+                        x.TokenValidationParameters.ValidAlgorithms = authSection.ValidAlgorithms;
+
+                        x.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authSection.Key));
+                    }
+                });
+
+            return services;
+        }
+
+        public static IApplicationBuilder UseRestoDbAuthentication(this IApplicationBuilder app, IConfiguration configuration)
+        {
+            bool authEnabled = configuration.GetValue<bool>("Auth:Enabled");
+            if (authEnabled)
             {
-                AuthProviderOptions? authSection =
-                    configuration.GetSection("Authentication").Get<AuthProviderOptions>() ?? throw new Exception("Auth section must exists");
+                app.UseAuthentication().UseAuthorization();
+            }
 
-                x.RequireHttpsMetadata = authSection.RequireHttpsMetadata;
-                x.SaveToken = authSection.SaveToken;
-                x.Authority = authSection.Issuer;
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateLifetime = authSection.ValidateLifetime,
-
-                    //issuer
-                    ValidIssuer = authSection.Issuer,
-                    ValidateIssuer = authSection.ValidateIssuer,
-
-                    //audience
-                    ValidAudience = authSection.Audience,
-                    ValidateAudience = authSection.ValidateAudience,
-
-                    NameClaimType = authSection.NameClaimType,
-                    RoleClaimType = authSection.RoleClaimType,
-                };
-
-                if (authSection.ValidateIssuerSigningKey)
-                {
-                    x.TokenValidationParameters.ValidateIssuerSigningKey = authSection.ValidateIssuerSigningKey;
-                    x.TokenValidationParameters.ValidAlgorithms = authSection.ValidAlgorithms;
-
-                    x.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authSection.Key));
-                }
-            }).Services;
+            return app;
+        }
 
     }
 

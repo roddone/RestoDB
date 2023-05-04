@@ -19,59 +19,16 @@ else if (provider == DbProviders.SqlServer) builder.Services.AddSingleton<SqlKat
 
 builder.Services.AddRestoDbSwagger(builder.Configuration);
 
-// handle authentication
-bool authEnabled = builder.Configuration.GetValue<bool>("Auth:Enabled");
-if (authEnabled) builder.Services.AddRestoDbJwtBearerAuthentication(builder.Configuration);
+builder.Services.AddRestoDbJwtBearerAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
-//get available routes
-var sqlKata = app.Services.GetService<SqlKataQueryFactory>() ?? throw new Exception("Cannot find service of type SqlKataQueryFactory");
-var tables = await sqlKata.GetTablesListAsync();
-var limitTo = builder.Configuration.GetSection("limitTo").Get<string[]>();
-if (limitTo?.Any() == true) tables = tables.Where(t => limitTo.Contains(t));
+app.UseRestoDbLoggingMiddleware(builder.Configuration);
 
-string apiSegment = builder.Configuration.GetValue("ApiSegment", "api")!;
-app.UseRestoDbLoggingMiddleware(apiSegment);
+await app.MapRestoDbRoutesAsync(builder.Configuration);
 
-//create routes (create individual routes so they can appear in swagger
-foreach (var table in tables)
-{
-    var route = app.MapGet($"/{apiSegment}/{table}", ([FromServices] SqlKataQueryFactory factory, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc) =>
-    {
-        Query sqlQuery = factory.Create(table);
 
-        if (!string.IsNullOrWhiteSpace(select)) sqlQuery = sqlQuery.Select(SafeSplit(select));
-
-        if (take.HasValue) sqlQuery = sqlQuery.Take(take.Value);
-
-        if (skip.HasValue) sqlQuery = sqlQuery.Skip(skip.Value);
-
-        if (!string.IsNullOrWhiteSpace(orderBy))
-        {
-            string[] parts = SafeSplit(orderBy);
-            sqlQuery = orderByDesc.HasValue && orderByDesc.Value ? sqlQuery.OrderByDesc(parts) : sqlQuery.OrderBy(parts);
-        }
-
-        return sqlQuery.GetAsync();
-    }).WithName(table).WithOpenApi();
-
-    if (authEnabled) route.RequireAuthorization();
-}
-
-if (authEnabled)
-{
-    app
-        .UseAuthentication()
-        .UseAuthorization();
-}
-
+app.UseRestoDbAuthentication(builder.Configuration);
 app.UseRestoDbSwaggerUi(builder.Configuration);
 
 await app.RunAsync();
-
-
-static string[] SafeSplit(string input)
-{
-    return input.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-}
