@@ -1,7 +1,5 @@
 ﻿
 using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Npgsql;
 using SqlKata;
 using SqlKata.Compilers;

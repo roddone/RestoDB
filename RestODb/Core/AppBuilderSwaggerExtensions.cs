@@ -1,15 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
+﻿using Microsoft.OpenApi.Models;
 
 namespace Access.It.Web.Swagger.Extensions;
 
 public static class SwaggerServiceCollectionExtensions
 {
-    public static IServiceCollection AddCustomSwagger(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddRestoDbSwagger(this IServiceCollection services, IConfiguration configuration)
     {
         bool swaggerEnabled = configuration.GetValue<bool>("EnableSwagger");
         if (swaggerEnabled) services.AddEndpointsApiExplorer().AddSwaggerGen(
@@ -39,7 +34,7 @@ public static class SwaggerServiceCollectionExtensions
 
         return services;
     }
-    public static IApplicationBuilder UseCustomSwaggerUi(this IApplicationBuilder application, IConfiguration configuration)
+    public static IApplicationBuilder UseRestoDbSwaggerUi(this IApplicationBuilder application, IConfiguration configuration)
     {
         bool swaggerEnabled = configuration.GetValue<bool>("EnableSwagger");
         if (swaggerEnabled)

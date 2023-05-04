@@ -1,12 +1,11 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace RestODb.Core
 {
     public static class AppBuilderAuthenticationExtensions
     {
-        public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddRestoDbJwtBearerAuthentication(this IServiceCollection services, IConfiguration configuration)
         => services
             .AddAuthorization()
             .AddAuthentication("MyBearer")
