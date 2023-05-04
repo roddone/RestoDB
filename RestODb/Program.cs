@@ -1,9 +1,11 @@
 using Access.It.Web.Swagger.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using RestODb.Core;
 using SqlKata;
 using SqlKata.Execution;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,8 +19,8 @@ if (provider == DbProviders.NpgSql) builder.Services.AddSingleton<SqlKataQueryFa
 else if (provider == DbProviders.SqlServer) builder.Services.AddSingleton<SqlKataQueryFactory, SqlServerQueryFactory>();
 
 builder.Services.AddCustomSwagger(builder.Configuration);
-
-builder.Services.AddLogging();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 // handle authentication
 bool authEnabled = builder.Configuration.GetValue<bool>("Auth:Enabled");
@@ -31,6 +33,31 @@ var sqlKata = app.Services.GetService<SqlKataQueryFactory>() ?? throw new Except
 var tables = await sqlKata.GetTablesListAsync();
 var limitTo = builder.Configuration.GetSection("limitTo").Get<string[]>();
 if (limitTo?.Any() == true) tables = tables.Where(t => limitTo.Contains(t));
+
+app.Use(async (ctx, next) =>
+{
+    //only /api/* routes
+    if (!ctx.Request.Path.Value?.StartsWith("/api") == true)
+    {
+        await next(ctx);
+        return;
+    }
+
+    var logger = ctx.RequestServices.GetService<ILogger<Program>>()!;
+    logger.LogDebug("Start selecting rows in table '{table}', with params : select={select}; skip={skip}; take={take}; orderBy={orderBy}; orderByDesc={orderByDesc};", ctx.Request.Path.Value.Replace("/api/", string.Empty), ctx.Request.Query["select"], ctx.Request.Query["skip"], ctx.Request.Query["take"], ctx.Request.Query["orderBy"], ctx.Request.Query["orderByDesc"]);
+
+    Stopwatch sw = Stopwatch.StartNew();
+    try
+    {
+        await next(ctx);
+        logger.LogDebug("Request finished, elapsed: {elapsed}", sw.Elapsed);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Unable to process request, elapsed: {elapsed}", sw.Elapsed);
+        throw;
+    }
+});
 
 //create routes (create individual routes so they can appear in swagger
 foreach (var table in tables)
