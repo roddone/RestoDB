@@ -1,5 +1,16 @@
 # RestoDB
-Rest over database
+RestoDB (Rest over database) is a micro-service that exposes a database through REST.
+You can expose all tables and vues, or select which ones you want to be exposed.
+
+## Providers
+RestoDB supports SQL Server and PostgreSQL.
+MySql and Sqlite will be implemented soon.
+
+## Authentication
+Todo : describe Jwt config 
+
+## Config
+Todo : describe all configs
 
 ## Todo
 - ~~Jwt authentication~~
