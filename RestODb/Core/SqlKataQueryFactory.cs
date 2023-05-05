@@ -32,7 +32,7 @@ public abstract class SqlKataQueryFactory
 
     public Query Create(string tableName, bool log = false)
     {
-        QueryFactory factory = GetFactory(_config.GetConnectionString("TestDB"), log);
+        QueryFactory factory = GetFactory(_config.GetConnectionString("RestoDB"), log);
 
         return factory.Query(tableName);
     }
@@ -57,10 +57,18 @@ public class NpgSqlQueryFactory : SqlKataQueryFactory
 
     public override async Task<IEnumerable<string>> GetTablesListAsync()
     {
-        return await Create("pg_catalog.pg_tables")
+        List<string> tables = new List<string>();
+        tables.AddRange(await Create("pg_catalog.pg_tables")
                             .WhereNotIn("schemaname", new string[] { "pg_catalog", "information_schema" })
                             .Select("tablename")
-                            .GetAsync<string>();
+                            .GetAsync<string>());
+
+        tables.AddRange(await Create("pg_catalog.pg_views")
+                            .WhereNotIn("schemaname", new string[] { "pg_catalog", "information_schema" })
+                            .Select("viewname")
+                            .GetAsync<string>());
+
+        return tables;
     }
 }
 
