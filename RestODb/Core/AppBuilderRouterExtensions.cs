@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using SqlKata;
 using SqlKata.Execution;
 using System.Diagnostics;
@@ -19,45 +20,69 @@ namespace RestODb.Core
             var tables = (await sqlKata.GetTablesListAsync()).ToList();
             logger.LogDebug("Found {tableCount} exposable entities in database", tables.Count);
 
+            //limit to configured entities
             var limitTo = configuration.GetSection("limitTo").Get<string[]>();
-            if (limitTo?.Any() == true) {
+            if (limitTo?.Any() == true)
+            {
                 tables = tables.FindAll(t => limitTo.Contains(t));
                 logger.LogDebug("Limiting to entities {@entities}", limitTo);
             }
+
+            //cache
+            bool cacheEnabled = configuration.GetValue("Cache:Enabled", false);
+            int cacheDuration = configuration.GetValue("Cache:DurationInSeconds", 60);
+            bool isCacheAbsolute = configuration.GetValue("Cache:Absolute", true);
+            logger.LogDebug("Cache enabled: {cacheEnabled}, duration: {cacheDuration}, absolute: {isCacheAbsolute}", cacheEnabled, cacheDuration, isCacheAbsolute);
 
             //create routes (create individual routes so they can appear in swagger
             foreach (var table in tables)
             {
                 string routePath = $"/{apiSegment}/{table}";
-                var route = app.MapGet(routePath, ([FromServices] SqlKataQueryFactory factory, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc) =>
+                var route = app.MapGet(routePath, ([FromServices] SqlKataQueryFactory factory, [FromServices] IMemoryCache cache, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc) =>
                 {
-                    Query sqlQuery = factory.Create(table);
+                    if (!cacheEnabled) return Execute(factory, table, select, skip, take, orderBy, orderByDesc);
 
-                    if (!string.IsNullOrWhiteSpace(select)) sqlQuery = sqlQuery.Select(SafeSplit(select));
+                    else return cache.GetOrCreateAsync($"{table}::{select}_{skip}_{take}_{orderBy}_{orderByDesc}", item =>
+                        {
+                            logger.LogDebug("(Re)creating cache for key {cacheKey}", item.Key);
 
-                    if (take.HasValue) sqlQuery = sqlQuery.Take(take.Value);
+                            if (isCacheAbsolute) item.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDuration));
+                            else item.SetSlidingExpiration(TimeSpan.FromSeconds(cacheDuration));
 
-                    if (skip.HasValue) sqlQuery = sqlQuery.Skip(skip.Value);
+                            return Execute(factory, table, select, skip, take, orderBy, orderByDesc);
+                        });
 
-                    if (!string.IsNullOrWhiteSpace(orderBy))
-                    {
-                        string[] parts = SafeSplit(orderBy);
-                        sqlQuery = orderByDesc.HasValue && orderByDesc.Value ? sqlQuery.OrderByDesc(parts) : sqlQuery.OrderBy(parts);
-                    }
-
-                    return sqlQuery.GetAsync();
                 }).WithName(table).WithOpenApi();
 
                 if (authEnabled) route.RequireAuthorization();
 
                 logger.LogInformation("Route {routePath} (GET) mapped", routePath);
             }
-            logger.LogInformation("Mapped {tableCount} in {elapsed}ms", tables.Count, sw.ElapsedMilliseconds);
+            logger.LogInformation("Mapped {tableCount} routes in {elapsed}ms", tables.Count, sw.ElapsedMilliseconds);
 
             return app;
         }
 
-        static string[] SafeSplit(string input)
+        private static Task<IEnumerable<dynamic>?> Execute(SqlKataQueryFactory factory, string table, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc)
+        {
+            Query sqlQuery = factory.Create(table);
+
+            if (!string.IsNullOrWhiteSpace(select)) sqlQuery = sqlQuery.Select(SafeSplit(select));
+
+            if (take.HasValue) sqlQuery = sqlQuery.Take(take.Value);
+
+            if (skip.HasValue) sqlQuery = sqlQuery.Skip(skip.Value);
+
+            if (!string.IsNullOrWhiteSpace(orderBy))
+            {
+                string[] parts = SafeSplit(orderBy);
+                sqlQuery = orderByDesc.HasValue && orderByDesc.Value ? sqlQuery.OrderByDesc(parts) : sqlQuery.OrderBy(parts);
+            }
+
+            return sqlQuery.GetAsync();
+        }
+
+        private static string[] SafeSplit(string input)
         {
             return input.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         }
