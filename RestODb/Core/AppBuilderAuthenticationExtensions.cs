@@ -77,8 +77,6 @@ namespace RestODb.Core
 
         public string Audience { get; set; }
 
-        public int TokenLifeTime { get; set; }
-        public int RefreshTokenLifeTime { get; set; }
         public string NameClaimType { get; set; } = "prefered_username";
         public string RoleClaimType { get; set; } = "role";
         public IEnumerable<string> ValidAlgorithms { get; set; } = new[] { "HS256" };
