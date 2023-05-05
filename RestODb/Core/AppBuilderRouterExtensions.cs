@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SqlKata;
 using SqlKata.Execution;
+using System.Diagnostics;
 
 namespace RestODb.Core
 {
@@ -10,16 +11,25 @@ namespace RestODb.Core
         {
             bool authEnabled = configuration.GetValue<bool>("Auth:Enabled");
             string apiSegment = configuration.GetValue("ApiSegment", "api")!;
+            var logger = app.Services.GetService<ILogger<Program>>()!;
+            Stopwatch sw = Stopwatch.StartNew();
+
             //get available routes
             var sqlKata = app.Services.GetService<SqlKataQueryFactory>() ?? throw new Exception("Cannot find service of type SqlKataQueryFactory");
-            var tables = await sqlKata.GetTablesListAsync();
+            var tables = (await sqlKata.GetTablesListAsync()).ToList();
+            logger.LogDebug("Found {tableCount} exposable entities in database", tables.Count);
+
             var limitTo = configuration.GetSection("limitTo").Get<string[]>();
-            if (limitTo?.Any() == true) tables = tables.Where(t => limitTo.Contains(t));
+            if (limitTo?.Any() == true) {
+                tables = tables.FindAll(t => limitTo.Contains(t));
+                logger.LogDebug("Limiting to entities {@entities}", limitTo);
+            }
 
             //create routes (create individual routes so they can appear in swagger
             foreach (var table in tables)
             {
-                var route = app.MapGet($"/{apiSegment}/{table}", ([FromServices] SqlKataQueryFactory factory, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc) =>
+                string routePath = $"/{apiSegment}/{table}";
+                var route = app.MapGet(routePath, ([FromServices] SqlKataQueryFactory factory, string? select, int? skip, int? take, string? orderBy, bool? orderByDesc) =>
                 {
                     Query sqlQuery = factory.Create(table);
 
@@ -39,7 +49,10 @@ namespace RestODb.Core
                 }).WithName(table).WithOpenApi();
 
                 if (authEnabled) route.RequireAuthorization();
+
+                logger.LogInformation("Route {routePath} (GET) mapped", routePath);
             }
+            logger.LogInformation("Mapped {tableCount} in {elapsed}ms", tables.Count, sw.ElapsedMilliseconds);
 
             return app;
         }
