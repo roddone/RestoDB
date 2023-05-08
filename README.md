@@ -39,6 +39,7 @@ RestoDB can use a cache to be more performant, to do so, use the 'Cache' section
 - ~~ensure it works for vues~~
 - ~~add odata (or other way(s) to query ?)~~
 - add api rate limiting
+- add CORS
 - add CI/CD
 - Crud operations ?
 - Dockerize
