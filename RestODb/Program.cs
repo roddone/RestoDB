@@ -12,7 +12,7 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddJsonFile("appSettings.json");
 if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appSettings.Development.json");
 
-//add correct SQLKata provider 
+builder.Services.AddCors();
 builder.Services.UseRestoDBDbProvider(builder.Configuration);
 builder.Services.AddMemoryCache();
 builder.Services.AddRestoDbSwagger(builder.Configuration);
@@ -25,7 +25,7 @@ app.UseRestoDbLoggingMiddleware(builder.Configuration);
 
 await app.MapRestoDbRoutesAsync(builder.Configuration);
 
-
+app.UseRestoDbCors(builder.Configuration);
 app.UseRestoDbAuthentication(builder.Configuration);
 app.UseRestoDbSwaggerUi(builder.Configuration);
 

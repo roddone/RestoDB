@@ -67,7 +67,7 @@ namespace RestODb.Core
         {
             Query sqlQuery = factory.Create(table);
 
-            if (!string.IsNullOrWhiteSpace(select)) sqlQuery = sqlQuery.Select(SafeSplit(select));
+            if (!string.IsNullOrWhiteSpace(select)) sqlQuery = sqlQuery.Select(select.SafeSplit());
 
             if (take.HasValue) sqlQuery = sqlQuery.Take(take.Value);
 
@@ -75,16 +75,12 @@ namespace RestODb.Core
 
             if (!string.IsNullOrWhiteSpace(orderBy))
             {
-                string[] parts = SafeSplit(orderBy);
+                string[] parts = orderBy.SafeSplit();
                 sqlQuery = orderByDesc.HasValue && orderByDesc.Value ? sqlQuery.OrderByDesc(parts) : sqlQuery.OrderBy(parts);
             }
 
             return sqlQuery.GetAsync();
         }
 
-        private static string[] SafeSplit(string input)
-        {
-            return input.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        }
     }
 }
