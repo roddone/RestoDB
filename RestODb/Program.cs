@@ -16,6 +16,7 @@ if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appS
 DbProviders provider = builder.Configuration.GetValue<DbProviders>("DbProvider");
 if (provider == DbProviders.NpgSql) builder.Services.AddSingleton<SqlKataQueryFactory, NpgSqlQueryFactory>();
 else if (provider == DbProviders.SqlServer) builder.Services.AddSingleton<SqlKataQueryFactory, SqlServerQueryFactory>();
+else if (provider == DbProviders.Sqlite) builder.Services.AddSingleton<SqlKataQueryFactory, SqliteQueryFactory>();
 builder.Services.AddMemoryCache();
 builder.Services.AddRestoDbSwagger(builder.Configuration);
 

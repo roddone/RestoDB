@@ -5,7 +5,7 @@ using SqlKata;
 using SqlKata.Compilers;
 using SqlKata.Execution;
 using System.Data;
-
+using System.Data.SQLite;
 
 public abstract class SqlKataQueryFactory
 {
@@ -83,11 +83,28 @@ public class SqlServerQueryFactory : SqlKataQueryFactory
     protected override IDbConnection GetConnection(string connectionString)
         => new SqlConnection(connectionString);
 
-    public override async Task<IEnumerable<string>> GetTablesListAsync()
+    public override Task<IEnumerable<string>> GetTablesListAsync()
+    => Create("INFORMATION_SCHEMA.TABLES")
+        .WhereNot("TABLE_SCHEMA", "sys")
+        .Select("TABLE_NAME")
+        .GetAsync<string>();
+}
+
+public class SqliteQueryFactory : SqlKataQueryFactory
+{
+    public SqliteQueryFactory(IConfiguration config, ILogger<SqlKataQueryFactory> logger) : base(config, logger)
     {
-        return await Create("INFORMATION_SCHEMA.TABLES")
-                                .WhereNot("TABLE_SCHEMA", "sys")
-                                .Select("TABLE_NAME")
-                                .GetAsync<string>();
     }
+
+    public override Task<IEnumerable<string>> GetTablesListAsync()
+        => Create("sqlite_master")
+            .WhereIn("type", new string[] { "table", "view" })
+            .Select("name")
+            .GetAsync<string>();
+
+    protected override Compiler GetCompiler()
+    => new SqliteCompiler();
+
+    protected override IDbConnection GetConnection(string connectionString)
+    => new SQLiteConnection(connectionString);
 }
