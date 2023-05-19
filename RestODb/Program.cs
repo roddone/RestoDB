@@ -13,10 +13,7 @@ builder.Configuration.AddJsonFile("appSettings.json");
 if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appSettings.Development.json");
 
 //add correct SQLKata provider 
-DbProviders provider = builder.Configuration.GetValue<DbProviders>("DbProvider");
-if (provider == DbProviders.NpgSql) builder.Services.AddSingleton<SqlKataQueryFactory, NpgSqlQueryFactory>();
-else if (provider == DbProviders.SqlServer) builder.Services.AddSingleton<SqlKataQueryFactory, SqlServerQueryFactory>();
-else if (provider == DbProviders.Sqlite) builder.Services.AddSingleton<SqlKataQueryFactory, SqliteQueryFactory>();
+builder.Services.UseRestoDBDbProvider(builder.Configuration);
 builder.Services.AddMemoryCache();
 builder.Services.AddRestoDbSwagger(builder.Configuration);
 
