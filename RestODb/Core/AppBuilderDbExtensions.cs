@@ -2,7 +2,7 @@
 {
     public static class AppBuilderDbExtensions
     {
-        public static IServiceCollection UseRestoDBDbProvider(this IServiceCollection services, IConfiguration config) 
+        public static IServiceCollection AddRestoDBDbProvider(this IServiceCollection services, IConfiguration config) 
         {
             DbProviders provider = config.GetValue<DbProviders>("DbProvider");
             return provider switch

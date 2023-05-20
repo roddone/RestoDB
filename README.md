@@ -3,8 +3,8 @@ RestoDB (Rest over database) is a micro-service that exposes a database through 
 You can expose all tables and vues, or select which ones you want to be exposed.
 
 ## Providers
-RestoDB supports SQL Server and PostgreSQL.
-MySql and Sqlite will be implemented soon.
+RestoDB supports SQL Server, PostgreSQL and SQLite.
+MySql will be implemented soon.
 
 ## Config
 - `LimitTo (string[])` : entities allowed to expose. if null or empty, all entities in the database will be exposed
@@ -27,10 +27,24 @@ Authentication is based on Jwt. You can configure how Jwt token should be interp
 - `Authentication.ValidateLifetime (boolean)` : indicates if the Api should validate the lifetime of the token, default false
 
 ## Cache
-RestoDB can use a cache to be more performant, to do so, use the 'Cache' section in configuration : 
-- `Cache.Enabled (boolean)` : indicated if the Api should use cache or not, default: false
+RestoDB can use a cache to be more performant and limit the requests to the database, to do so, use the 'Cache' section in configuration : 
+- `Cache.Enabled (boolean)` : indicates if the Api should use cache or not, default: false
 - `Cache.DurationInSeconds (int)` : indicates the cache duration in seconds, default: 60s
 - `Cache.Absolute (boolean)` : indicates if the cache should be absolute(true) or sliding(false), default: true
+
+## Cors
+You can enable and configure Cors this way : 
+- `Cors.Enabled (boolean)`: indicates if the Api should use Cors or not, default: false
+- `Cors.AllowedOrigins (string[])`: the allowed origins
+- `Cors.AllowedMethods (string[])`: the allowed methods
+- `Cors.AllowedHeaders (string[])`: the allowed headers
+
+## Rate limiting
+You can enable and configure rate limiting this way : 
+- `RateLimiter.Enabled (boolean)`: indicates if the Api should enable rate limiter, default: false
+- `RateLimiter.PermitLimit (int)`: the number of requests allowed during the specified window, default: 100
+- `RateLimiter.WindowInSeconds (int)`: the window in seconds, default: 60
+- `RateLimiter.QueueLimit (int)`: the number of requests to be queued if the limit is reached, default: 0
 
 ## Todo
 - ~~Jwt authentication~~
@@ -38,8 +52,8 @@ RestoDB can use a cache to be more performant, to do so, use the 'Cache' section
 - ~~logs~~
 - ~~ensure it works for vues~~
 - ~~add odata (or other way(s) to query ?)~~
-- add api rate limiting
-- add CORS
+- ~~add api rate limiting~~
+- ~~add CORS~~
 - add CI/CD
 - Crud operations ?
 - Dockerize

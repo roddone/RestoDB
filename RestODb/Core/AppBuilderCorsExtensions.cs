@@ -15,29 +15,45 @@ public static class AppBuilderCorsExtensions
     /// </summary>
     /// <param name="application"></param>
     /// <returns></returns>
-    public static IApplicationBuilder UseRestoDbCors(this IApplicationBuilder application, IConfiguration config) =>
-        application.UseCors(corsConfig =>
-        {
-            var allowedHeaders = config.GetSection("Cors:AllowedHeaders").Get<string[]>() ?? Array.Empty<string>();
+    public static IApplicationBuilder UseRestoDbCors(this IApplicationBuilder application, IConfiguration config)
+    {
+        bool enabled = config.GetValue<bool>("Cors:Enabled");
 
-            if (allowedHeaders.IsNullOrEmpty())
-                corsConfig.AllowAnyHeader();
-            else
-                corsConfig.WithHeaders(allowedHeaders);
+        if (enabled)
+            application.UseCors(corsConfig =>
+            {
+                var allowedHeaders = config.GetSection("Cors:AllowedHeaders").Get<string[]>() ?? Array.Empty<string>();
 
-            var allowedMethods = config.GetSection("Cors:AllowedMethods").Get<string[]>() ?? Array.Empty<string>();
+                if (allowedHeaders.IsNullOrEmpty())
+                    corsConfig.AllowAnyHeader();
+                else
+                    corsConfig.WithHeaders(allowedHeaders);
 
-            if (allowedMethods.IsNullOrEmpty())
-                corsConfig.AllowAnyMethod();
-            else
-                corsConfig.WithMethods(allowedMethods);
+                var allowedMethods = config.GetSection("Cors:AllowedMethods").Get<string[]>() ?? Array.Empty<string>();
 
-            var allowedOrigins = config.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+                if (allowedMethods.IsNullOrEmpty())
+                    corsConfig.AllowAnyMethod();
+                else
+                    corsConfig.WithMethods(allowedMethods);
 
-            if (allowedOrigins.IsNullOrEmpty())
-                corsConfig.AllowAnyOrigin();
-            else
-                corsConfig.WithOrigins(allowedOrigins);
-        });
+                var allowedOrigins = config.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
+                if (allowedOrigins.IsNullOrEmpty())
+                    corsConfig.AllowAnyOrigin();
+                else
+                    corsConfig.WithOrigins(allowedOrigins);
+            });
+
+        return application;
+    }
+
+    public static IServiceCollection AddRestoDBCors(this IServiceCollection services, IConfiguration config)
+    {
+        bool enabled = config.GetValue<bool>("Cors:Enabled");
+
+        if (enabled)
+            services.AddCors();
+
+        return services;
+    }
 }

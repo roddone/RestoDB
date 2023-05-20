@@ -11,6 +11,8 @@ namespace RestODb.Core
         public static async Task<IApplicationBuilder> MapRestoDbRoutesAsync(this WebApplication app, IConfiguration configuration)
         {
             bool authEnabled = configuration.GetValue<bool>("Auth:Enabled");
+            bool rateLimiterEnabled = configuration.GetValue<bool>("RateLimiter:Enabled");
+
             string apiSegment = configuration.GetValue("ApiSegment", "api")!;
             var logger = app.Services.GetService<ILogger<Program>>()!;
             Stopwatch sw = Stopwatch.StartNew();
@@ -55,7 +57,8 @@ namespace RestODb.Core
                 }).WithName(table).WithOpenApi();
 
                 if (authEnabled) route.RequireAuthorization();
-
+                if(rateLimiterEnabled) route.RequireRateLimiting(AppBuilderRateLimiterExtensions.PolicyName);
+                
                 logger.LogInformation("Route {routePath} (GET) mapped", routePath);
             }
             logger.LogInformation("Mapped {tableCount} routes in {elapsed}ms", tables.Count, sw.ElapsedMilliseconds);
