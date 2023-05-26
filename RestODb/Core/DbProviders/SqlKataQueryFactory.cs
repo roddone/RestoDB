@@ -28,7 +28,7 @@ public abstract class SqlKataQueryFactory
 
     public Query Create(string tableName, bool log = false)
     {
-        QueryFactory factory = GetFactory(_config.GetConnectionString("RestoDB"), log);
+        QueryFactory factory = GetFactory(_config.GetValue<string>("DbConnection"), log);
 
         return factory.Query(tableName);
     }

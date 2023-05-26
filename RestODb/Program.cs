@@ -9,8 +9,8 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 builder.Configuration.AddEnvironmentVariables();
-builder.Configuration.AddJsonFile("appSettings.json");
-if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appSettings.Development.json");
+builder.Configuration.AddJsonFile("appsettings.json");
+if (builder.Environment.IsDevelopment()) builder.Configuration.AddJsonFile("appsettings.Development.json");
 
 builder.Services.AddRestoDBCors(builder.Configuration);
 builder.Services.AddRestoDBDbProvider(builder.Configuration);
