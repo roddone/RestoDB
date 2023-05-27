@@ -1,9 +1,10 @@
 # RestoDB
 RestoDB (Rest over database) is a micro-service that exposes a database through REST.
 You can expose all tables and vues, or select which ones you want to be exposed.
+It uses aspnet minimal API for routes declarations and can provide authentication, caching, CORS, Swagger and rate limiting. 
 
 ## Providers
-RestoDB supports SQL Server, PostgreSQL and SQLite.
+Thanks to [SQLKata](https://github.com/sqlkata/querybuilder), RestoDB natively supports SQL Server, PostgreSQL and SQLite.
 MySql will be implemented soon.
 
 ## Config
