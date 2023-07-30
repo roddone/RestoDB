@@ -47,6 +47,11 @@ You can enable and configure rate limiting this way :
 - `RateLimiter:WindowInSeconds (int)`: the window in seconds, default: 60
 - `RateLimiter:QueueLimit (int)`: the number of requests to be queued if the limit is reached, default: 0
 
+## Csv
+You can natively export get data in csv format by adding "/csv" to any route.
+- `Csv:Enabled (boolean)`: indicates if the Api should enable Csv routes, default: true
+- `Csv:Separator (string)`: the separator used in Csv results, default: "," (comma)
+
 ## Todo
 - ~~Jwt authentication~~
 - ~~Swagger~~

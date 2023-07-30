@@ -1,8 +1,5 @@
 using Access.It.Web.Swagger.Extensions;
-using Microsoft.AspNetCore.Mvc;
 using RestODb.Core;
-using SqlKata;
-using SqlKata.Execution;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
