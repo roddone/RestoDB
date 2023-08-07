@@ -4,8 +4,7 @@ You can expose all tables and vues, or select which ones you want to be exposed.
 It uses aspnet minimal API for routes declarations and can provide authentication, caching, CORS, Swagger and rate limiting. 
 
 ## Providers
-Thanks to [SQLKata](https://github.com/sqlkata/querybuilder), RestoDB natively supports SQL Server, PostgreSQL and SQLite.
-MySql will be implemented soon.
+Thanks to [SQLKata](https://github.com/sqlkata/querybuilder), RestoDB natively supports SQL Server, PostgreSQL, Mysql and SQLite.
 
 ## Config
 - `LimitTo (string[])` : entities allowed to expose. if null or empty, all entities in the database will be exposed
@@ -61,8 +60,7 @@ You can natively export get data in csv format by adding "/csv" to any route.
 - ~~add api rate limiting~~
 - ~~add CORS~~
 - add CI/CD
-- Crud operations ?
 - ~~Dockerize~~
 - Write a decent readme (in progress)
 - ~~Add a cache~~
-- Add more database providers
+- ~~Add more database providers~~

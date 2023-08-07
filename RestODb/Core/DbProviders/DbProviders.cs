@@ -1,5 +1,5 @@
 ﻿
     public enum DbProviders
     {
-        None, NpgSql, SqlServer, Sqlite
+        None, NpgSql, SqlServer, Sqlite, Mysql
     }

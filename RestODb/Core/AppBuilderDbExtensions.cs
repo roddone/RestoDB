@@ -10,6 +10,7 @@
                 DbProviders.NpgSql => services.AddSingleton<SqlKataQueryFactory, NpgSqlQueryFactory>(),
                 DbProviders.SqlServer => services.AddSingleton<SqlKataQueryFactory, SqlServerQueryFactory>(),
                 DbProviders.Sqlite => services.AddSingleton<SqlKataQueryFactory, SqliteQueryFactory>(),
+                DbProviders.Mysql => services.AddSingleton<SqlKataQueryFactory, MysqlQueryFactory>(),
                 _ => throw new NotImplementedException("Unkwnown database provider")
             };
         }
