@@ -1,4 +1,3 @@
-using Access.It.Web.Swagger.Extensions;
 using RestODb.Core;
 
 var builder = WebApplication.CreateBuilder(args);

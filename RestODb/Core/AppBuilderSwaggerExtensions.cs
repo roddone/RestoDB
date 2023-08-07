@@ -1,6 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 
-namespace Access.It.Web.Swagger.Extensions;
+namespace RestODb.Core;
 
 public static class SwaggerServiceCollectionExtensions
 {
