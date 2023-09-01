@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Dapper;
+using MySql.Data.MySqlClient;
 using SqlKata.Compilers;
 using SqlKata.Execution;
 using System.Data;
@@ -21,4 +22,19 @@ public class MysqlQueryFactory : SqlKataQueryFactory
 
     protected override IDbConnection GetConnection(string connectionString)
     => new MySqlConnection(connectionString);
+
+    public override async Task<IEnumerable<ColumnDescription>> GetEntityColumnsDescription(string tableName)
+    {
+        var result = await GetFactory().Connection.ExecuteReaderAsync($"SHOW COLUMNS FROM {tableName}");
+        List<ColumnDescription> descriptions = new();
+        while (result.Read())
+        {
+            string name = result.GetString(0);
+            string type = result.GetString(1);
+            bool notNull = result.GetString(2) is string n && n == "NO";
+
+            descriptions.Add(new() { Name = name, Type = type, NotNull = notNull });
+        }
+        return descriptions;
+    }
 }
