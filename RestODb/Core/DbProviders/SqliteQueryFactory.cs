@@ -3,7 +3,6 @@ using SqlKata.Compilers;
 using SqlKata.Execution;
 using System.Data;
 using System.Data.SQLite;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 public class SqliteQueryFactory : SqlKataQueryFactory
 {
@@ -37,11 +36,4 @@ public class SqliteQueryFactory : SqlKataQueryFactory
         }
         return descriptions;
     }
-}
-
-public struct ColumnDescription
-{
-    public string Name { get; set; }
-    public string Type { get; set; }
-    public bool NotNull { get; set; }
 }
