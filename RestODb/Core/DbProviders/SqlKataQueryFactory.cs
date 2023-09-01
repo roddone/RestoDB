@@ -15,9 +15,9 @@ public abstract class SqlKataQueryFactory
         _logger = logger;
     }
 
-    protected QueryFactory GetFactory(string connectionString, bool log = false)
+    protected QueryFactory GetFactory(bool log = false)
     {
-        IDbConnection connection = GetConnection(connectionString);
+        IDbConnection connection = GetConnection(_config.GetValue<string>("DbConnection"));
         Compiler compiler = GetCompiler();
 
         return new QueryFactory(connection, compiler)
@@ -26,9 +26,9 @@ public abstract class SqlKataQueryFactory
         };
     }
 
-    public Query Create(string tableName, bool log = false)
+    public Query Create(string? tableName = null, bool log = false)
     {
-        QueryFactory factory = GetFactory(_config.GetValue<string>("DbConnection"), log);
+        QueryFactory factory = GetFactory(log);
 
         return factory.Query(tableName);
     }
@@ -38,4 +38,9 @@ public abstract class SqlKataQueryFactory
     protected abstract Compiler GetCompiler();
 
     public abstract Task<IEnumerable<string>> GetTablesListAsync();
+
+    public virtual Task<IEnumerable<ColumnDescription>> GetEntityColumnsDescription(string tableName)
+    {
+        return Task.FromResult(Array.Empty<ColumnDescription>().AsEnumerable());
+    }
 }

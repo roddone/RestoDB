@@ -45,9 +45,10 @@ namespace RestODb.Core
             //create routes (create individual routes so they can appear in swagger
             foreach (var table in tables)
             {
+                var description = await sqlKata.GetEntityColumnsDescription(table);
                 string routePath = $"/{apiSegment}/{table}";
                 var route = app.MapGet(routePath, HandleAsync)
-                               .Produces(200, contentType: "application/json")
+                               .Produces(200, responseType: TypeBuilderHelper.BuildTypeForEntity(table, description), contentType: "application/json")
                                .WithName(table)
                                .WithOpenApi();
 
