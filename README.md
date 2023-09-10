@@ -1,5 +1,6 @@
 # RestoDB
-RestoDB (Rest over database) is a micro-service that exposes a database through REST.
+RestoDB (Rest over database) is a micro-service that exposes any existing database through REST.
+Each table or vue will have its own endpoints to be queried in json or csv. 
 You can expose all tables and vues, or select which ones you want to be exposed.
 It uses aspnet minimal API for routes declarations and can provide authentication, caching, CORS, Swagger and rate limiting. 
 
