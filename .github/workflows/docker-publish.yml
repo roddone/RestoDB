@@ -26,5 +26,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag roddone/restodb:$DOCKER_TAG --tag roddone/restodb:latest
-    - name: Push the Docker image
+    - name: Push roddone/restodb:$DOCKER_TAG
       run: docker push roddone/restodb:$DOCKER_TAG
+    - name: Push roddone/restodb:latest
+      run: docker push roddone/restodb:latest
