@@ -25,6 +25,6 @@ jobs:
         # Password or personal access token used to log against the Docker registry
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag roddone/restodb:$DOCKER_TAG
+      run: docker build . --file Dockerfile --tag roddone/restodb:$DOCKER_TAG --tag roddone/restodb:latest
     - name: Push the Docker image
       run: docker push roddone/restodb:$DOCKER_TAG
