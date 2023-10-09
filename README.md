@@ -18,13 +18,13 @@ RestoDb is now available on your host at http://localhost:3000.
 
 If you need to use array parameters, you must give and index to the environment variable name, exemple with 'LimitTo' parameter: 
 <pre>
-docker run --rm --env=DbProvider=<<YOUR_DB_PROVIDER>> --env=DbConnection="<<YOUR_CONNECTION_STRING>>" --env=<b>LimitTo:0=Users</b> --env=<b>LimitTo:1=Cities</b> -p 3000:80 roddone/restodb
+docker run --rm --env=DbProvider=&lt;&lt;YOUR_DB_PROVIDER&gt;&gt; --env=DbConnection="&lt;&lt;YOUR_CONNECTION_STRING&gt;&gt;" --env=<b>LimitTo:0=Users</b> --env=<b>LimitTo:1=Cities</b> -p 3000:80 roddone/restodb
 # replace YOUR_DB_PROVIDER and YOUR_CONNECTION_STRING, see 'Config' section for possible values
 </pre>
 
 If you need to use any of the objects parameters (Config, Authentication, Cors, RateLimiting or Csv), you must prefix by the section's name, exemple with 'Csv' section : 
 <pre>
-docker run --rm --env=DbProvider=<<YOUR_DB_PROVIDER>> --env=DbConnection="<<YOUR_CONNECTION_STRING>>" --env=<b>Csv:Enabled=true</b> --env=<b>Csv:Separator="|"</b> -p 3000:80 roddone/restodb
+docker run --rm --env=DbProvider=&lt;&lt;YOUR_DB_PROVIDER&gt;&gt; --env=DbConnection="&lt;&lt;YOUR_CONNECTION_STRING&gt;&gt;" --env=<b>Csv:Enabled=true</b> --env=<b>Csv:Separator="|"</b> -p 3000:80 roddone/restodb
 # replace YOUR_DB_PROVIDER and YOUR_CONNECTION_STRING, see 'Config' section for possible values
 </pre>
 
