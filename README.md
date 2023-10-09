@@ -7,13 +7,38 @@ It uses aspnet minimal API for routes declarations and can provide authenticatio
 ## Providers
 Thanks to [SQLKata](https://github.com/sqlkata/querybuilder), RestoDB natively supports SQL Server, PostgreSQL, Mysql and SQLite.
 
+## Docker
+Open a terminal and run the following command:
+<pre>
+docker run --rm --env=DbProvider=<b>&lt;&lt;YOUR_DB_PROVIDER&gt;&gt;</b> --env=DbConnection=<b>"&lt;&lt;YOUR_CONNECTION_STRING&gt;&gt;"</b> -p 3000:80 roddone/restodb
+# replace YOUR_DB_PROVIDER and YOUR_CONNECTION_STRING, see Config section for possible values
+</pre>
+
+RestoDb is now available on your host at http://localhost:3000.
+
+If you need to use array parameters, you must give and index to the environment variable name, exemple with 'LimitTo' parameter: 
+<pre>
+docker run --rm --env=DbProvider=<<YOUR_DB_PROVIDER>> --env=DbConnection="<<YOUR_CONNECTION_STRING>>" --env=<b>LimitTo:0=Users</b> --env=<b>LimitTo:1=Cities</b> -p 3000:80 roddone/restodb
+# replace YOUR_DB_PROVIDER and YOUR_CONNECTION_STRING, see 'Config' section for possible values
+</pre>
+
+If you need to use any of the objects parameters (Config, Authentication, Cors, RateLimiting or Csv), you must prefix by the section's name, exemple with 'Csv' section : 
+<pre>
+docker run --rm --env=DbProvider=<<YOUR_DB_PROVIDER>> --env=DbConnection="<<YOUR_CONNECTION_STRING>>" --env=<b>Csv:Enabled=true</b> --env=<b>Csv:Separator="|"</b> -p 3000:80 roddone/restodb
+# replace YOUR_DB_PROVIDER and YOUR_CONNECTION_STRING, see 'Config' section for possible values
+</pre>
+
 ## Config
-- `LimitTo (string[])` : entities allowed to expose. if null or empty, all entities in the database will be exposed
-- `DbProvider (string)` : the database provider that will be used. Possible values are 'NpgSql' or 'SqlServer'
+- `DbProvider (string, MANDATORY)` : the database provider that will be used. Possible values are _'NpgSql'_, _'SqlServer'_, _'MySql'_ or _'Sqlite'_
+- `DbConnection (string, MANDATORY)`: the database connection string
+- `LimitTo (string[])` : entities allowed to expose. **if null or empty, all entities in the database will be exposed**
 - `EnableSwagger (boolean)` : indicates if the swagger should be enabled or not
-- `ApiSegment (string)` : the base path for all routes, default is "api"
+- `ApiSegment (string)` : the base path for all routes, default is "_api_"
 - `Authentication (Object)` : see Authentication section
 - `Cache (Object)` : see Cache section
+- `Cors (Object)` : see Cors section
+- `RateLimiting (Object)` : see Rate limiting section
+- `Csv (Object)` : see Csv section
 
 ## Authentication
 Authentication is based on Jwt. You can configure how Jwt token should be interpreted : 
@@ -51,17 +76,3 @@ You can enable and configure rate limiting this way :
 You can natively export get data in csv format by adding "/csv" to any route.
 - `Csv:Enabled (boolean)`: indicates if the Api should enable Csv routes, default: true
 - `Csv:Separator (string)`: the separator used in Csv results, default: "," (comma)
-
-## Todo
-- ~~Jwt authentication~~
-- ~~Swagger~~
-- ~~logs~~
-- ~~ensure it works for vues~~
-- ~~add odata (or other way(s) to query ?)~~
-- ~~add api rate limiting~~
-- ~~add CORS~~
-- add CI/CD
-- ~~Dockerize~~
-- Write a decent readme (in progress)
-- ~~Add a cache~~
-- ~~Add more database providers~~
