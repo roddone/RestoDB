@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DOCKER_TAG: 0.0.1-${{ github.run_number }}
+  DOCKER_TAG: 0.0.2-${{ github.run_number }}
   
 jobs:
 
